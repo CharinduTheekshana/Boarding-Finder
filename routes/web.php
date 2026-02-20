@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/districts/{district}/cities', [HomeController::class, 'citiesByDistrict'])->name('districts.cities');
 Route::get('/ads', [BoardingController::class, 'index'])->name('ads.index');
 Route::get('/ads/{boarding}', [BoardingController::class, 'show'])->name('ads.show');
 

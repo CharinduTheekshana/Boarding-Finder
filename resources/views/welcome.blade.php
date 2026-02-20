@@ -6,7 +6,20 @@
     <title>Boarding Finder</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body
+    class="bg-gray-50 text-gray-900"
+    x-data="{
+        scrollDistricts(direction) {
+            const container = this.$refs.districtsTrack;
+            if (!container) return;
+            const column = container.querySelector('[data-district-column]');
+            const step = column ? column.offsetWidth + 16 : 200;
+            container.scrollBy({ left: direction * step, behavior: 'smooth' });
+        }
+    }"
+    @keydown.window.left.prevent="scrollDistricts(-1)"
+    @keydown.window.right.prevent="scrollDistricts(1)"
+>
     @include('partials.public-navbar')
 
     <main>
@@ -28,14 +41,49 @@
         </section>
 
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h2 class="text-2xl font-semibold mb-5">Popular Cities</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                @foreach ($popularCities as $city)
-                    <a href="{{ route('ads.index', ['city' => $city['name']]) }}" class="rounded-xl overflow-hidden border border-gray-200 bg-white hover:shadow-md transition">
-                        <img src="{{ $city['image'] }}" alt="{{ $city['name'] }}" class="h-40 w-full object-cover">
-                        <p class="px-3 py-2 text-sm font-medium">{{ $city['name'] }}</p>
-                    </a>
-                @endforeach
+            <div class="mb-5 flex items-center justify-between">
+                <h2 class="text-2xl font-semibold">Browse by District</h2>
+                <p class="text-sm text-gray-500">Use ← → keys or arrows</p>
+            </div>
+
+            <div class="relative">
+                <button
+                    @click="scrollDistricts(-1)"
+                    class="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-indigo-600 p-2 text-white shadow hover:bg-indigo-700"
+                    title="Previous (←)"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+
+                <div
+                    x-ref="districtsTrack"
+                    class="mx-10 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                    <div class="flex gap-4 pb-1">
+                        @foreach (array_chunk($districts, 2) as $districtColumn)
+                            <div data-district-column class="w-40 shrink-0 space-y-4 sm:w-44">
+                                @foreach ($districtColumn as $district)
+                                    <a href="{{ route('districts.cities', ['district' => $district['name']]) }}" class="block overflow-hidden rounded-xl border border-gray-200 bg-white transition hover:shadow-md">
+                                        <img src="{{ $district['image'] }}" alt="{{ $district['name'] }}" class="h-24 w-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{{ 'https://picsum.photos/seed/'.rawurlencode($district['name']).'/600/400' }}';">
+                                        <p class="px-3 py-2 text-sm font-medium">{{ $district['name'] }}</p>
+                                    </a>
+                                @endforeach
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <button
+                    @click="scrollDistricts(1)"
+                    class="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-indigo-600 p-2 text-white shadow hover:bg-indigo-700"
+                    title="Next (→)"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
             </div>
         </section>
 
